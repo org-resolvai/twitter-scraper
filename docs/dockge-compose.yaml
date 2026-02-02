@@ -26,11 +26,11 @@ services:
     image: ghcr.io/org-resolvai/twitter-scraper:latest
     restart: unless-stopped
     environment:
-      # Environment variables required for the monitor to log in and connect to the database.
+      # Environment variables required for the monitor to connect to the database and API.
       DATABASE_URL: ${DATABASE_URL}
-      TWITTER_USERNAME: ${TWITTER_USERNAME}
-      TWITTER_PASSWORD: ${TWITTER_PASSWORD}
-      TWITTER_EMAIL: ${TWITTER_EMAIL} # Optional
+      API_URL: http://twitter-scraper-api:3000
+    depends_on:
+      - twitter-scraper-api
     command: ["yarn", "monitor"] # This is the key: it runs the monitor instead of the server.
     networks:
       - dockge_default

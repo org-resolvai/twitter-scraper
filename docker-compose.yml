@@ -6,13 +6,9 @@ services:
       - .env.local
     environment:
       - DATABASE_URL=postgresql://neondb_owner:npg_hNJyn57adrgx@ep-aged-truth-a1vexyjq-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-    # Or specify individual environment variables:
-    # environment:
-    #   - TWITTER_USERNAME=${TWITTER_USERNAME}
-    #   - TWITTER_PASSWORD=${TWITTER_PASSWORD}
-    #   - TWITTER_EMAIL=${TWITTER_EMAIL}
-    #   - TWITTER_COOKIES=${TWITTER_COOKIES}
-    #   - PROXY_URL=${PROXY_URL}
+      - API_URL=http://api:3000
+    depends_on:
+      - api
   api:
     build: .
     command: ["yarn", "server"]

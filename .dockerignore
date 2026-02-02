@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+.git
+.husky
+.vscode
+.idea
+*.log
+.env
+.env.local
+.DS_Store

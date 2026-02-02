@@ -1,8 +1,6 @@
 import { Pool } from 'pg';
-import { Scraper } from './scraper';
 import { Tweet } from './tweets';
-import { SearchMode } from './search';
-import { cycleTLSFetch, cycleTLSExit } from './cycletls-fetch';
+import fetch from 'cross-fetch';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -43,26 +41,38 @@ export async function upsertTweet(tweet: Tweet, criteria: string, client: any) {
   }
 }
 
-export async function processJob(scraper: Scraper, job: any, poolInstance: Pool = pool) {
+export async function processJob(job: any, poolInstance: Pool = pool) {
   const client = await poolInstance.connect();
   try {
     console.log(`[Job ${job.job_id}] Starting ${job.type}: ${job.query}`);
     
     let count = 0;
     const criteriaTag = `${job.type}:${job.query}`;
+    
+    const API_URL = process.env.API_URL || 'http://localhost:3000';
+    let results: Tweet[] = [];
 
     if (job.type === 'profile') {
-      const iterator = scraper.getTweets(job.query, 20);
-      for await (const tweet of iterator) {
-        await upsertTweet(tweet, criteriaTag, client);
-        count++;
+      console.log(`[Job ${job.job_id}] Fetching tweets from API: ${API_URL}/tweets/${job.query}`);
+      const response = await fetch(`${API_URL}/tweets/${job.query}?count=20`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`);
       }
+      const json = await response.json();
+      results = json.data || [];
     } else if (job.type === 'search') {
-      const iterator = scraper.searchTweets(job.query, 20, SearchMode.Top);
-      for await (const tweet of iterator) {
-        await upsertTweet(tweet, criteriaTag, client);
-        count++;
+      console.log(`[Job ${job.job_id}] Fetching search from API: ${API_URL}/search?q=${job.query}`);
+      const response = await fetch(`${API_URL}/search?q=${encodeURIComponent(job.query)}&count=20&mode=Top`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`);
       }
+      const json = await response.json();
+      results = json.data || [];
+    }
+
+    for (const tweet of results) {
+      await upsertTweet(tweet, criteriaTag, client);
+      count++;
     }
 
     console.log(`[Job ${job.job_id}] Finished. Upserted ${count} tweets.`);
@@ -82,9 +92,7 @@ export async function processJob(scraper: Scraper, job: any, poolInstance: Pool 
 
   } catch (err) {
     console.error(`[Job ${job.job_id}] Failed:`, err);
-    // On failure, retry sooner? Or same schedule? 
-    // For now, let's stick to the schedule to avoid loops, or maybe retry in 15 mins.
-    // Let's use a shorter fixed retry of 15 mins on failure.
+    // On failure, retry in 15 mins.
     const retryMinutes = 15;
     await client.query(`
       UPDATE jobs 
@@ -98,51 +106,14 @@ export async function processJob(scraper: Scraper, job: any, poolInstance: Pool 
 }
 
 export async function runMonitor(poolInstance: Pool = pool) {
-  // Initialize Scraper with CycleTLS
-  // Note: xClientTransactionId requires Node.js 22+ (ArrayBuffer.transfer)
-  const scraper = new Scraper({
-    fetch: cycleTLSFetch,
-    experimental: {
-      xClientTransactionId: true,
-      xpff: true,
-    },
-  });
-
-  const username = process.env.TWITTER_USERNAME;
-  const password = process.env.TWITTER_PASSWORD;
-  const email = process.env.TWITTER_EMAIL;
-  const cookies = process.env.TWITTER_COOKIES;
+  console.log('Monitor service started. Connecting to API for data...');
 
   try {
-    // Prefer cookie auth (more reliable), fall back to password
-    if (cookies) {
-      console.log('Authenticating with cookies...');
-      const parsedCookies = JSON.parse(cookies) as Array<{
-        key: string;
-        value: string;
-        domain?: string;
-        path?: string;
-      }>;
-      const cookieStrings = parsedCookies.map(
-        (c) => `${c.key}=${c.value}; Domain=${c.domain || '.x.com'}; Path=${c.path || '/'}`
-      );
-      await scraper.setCookies(cookieStrings);
-      console.log('Authenticated with cookies.');
-    } else if (username && password) {
-      console.log('Logging in with username/password...');
-      await scraper.login(username, password, email);
-      console.log('Logged in successfully.');
-    } else {
-      console.error('Missing TWITTER_COOKIES or TWITTER_USERNAME/TWITTER_PASSWORD in environment');
-      process.exit(1);
-    }
-
     while (true) {
       const client = await poolInstance.connect();
       let jobs = [];
       try {
         // Fetch due jobs based on next_run_at
-        // If next_run_at is NULL, it runs immediately (first run)
         const res = await client.query(`
           SELECT * FROM jobs 
           WHERE active = true 
@@ -157,7 +128,7 @@ export async function runMonitor(poolInstance: Pool = pool) {
 
       if (jobs.length > 0) {
         const job = jobs[0];
-        await processJob(scraper, job, poolInstance);
+        await processJob(job, poolInstance);
         
         // Cool down: Sleep between 5 and 30 seconds
         const sleepTime = Math.floor(Math.random() * 25000) + 5000;
@@ -174,16 +145,13 @@ export async function runMonitor(poolInstance: Pool = pool) {
   } catch (err) {
     console.error('Fatal error in monitor:', err);
     await poolInstance.end();
-    cycleTLSExit();
     process.exit(1);
   }
 }
 
-import { fileURLToPath } from 'url';
-
-// ... (rest of imports)
-
-// ... (functions)
-
-runMonitor();
-
+/**
+ * Run the monitor if this file is executed directly.
+ */
+if (typeof require !== 'undefined' && require.main === module) {
+  runMonitor();
+}

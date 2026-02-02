@@ -624,3 +624,6 @@ export class Scraper {
     return res.value;
   }
 }
+
+export { SearchMode };
+export type { Tweet };

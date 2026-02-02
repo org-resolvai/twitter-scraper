@@ -275,6 +275,34 @@ page in the documentation. The library provides two pre-written implementations 
 - `WaitingRateLimitStrategy`: The default, which waits for the limit to expire.
 - `ErrorRateLimitStrategy`: A strategy that throws if any rate-limit event occurs.
 
+### HTTP API Server
+
+This library includes a built-in HTTP API server that exposes the scraper functionality via REST endpoints. This is useful for decoupling the scraping logic from your application or for running the scraper in a separate container.
+
+**Starting the Server:**
+
+```sh
+# Requires TWITTER_USERNAME, TWITTER_PASSWORD (and optionally TWITTER_EMAIL) in environment or .env
+yarn server
+```
+
+**Endpoints:**
+
+*   `GET /tweets/:username`: Fetch the latest tweets from a user's timeline.
+    *   Query params: `count` (default: 20)
+*   `GET /search`: Search for tweets.
+    *   Query params: `q` (query), `mode` (Top, Latest), `count` (default: 20)
+
+**Examples:**
+
+```bash
+# Get 20 tweets from @elonmusk
+curl "http://localhost:3000/tweets/elonmusk"
+
+# Search for "Node.js"
+curl "http://localhost:3000/search?q=Node.js&mode=Top"
+```
+
 ## Contributing
 
 ### Setup

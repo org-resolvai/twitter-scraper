@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import { Scraper, Tweet, SearchMode } from './scraper';
+import { Scraper, SearchMode } from './scraper';
+import { cycleTLSFetch, cycleTLSExit } from './cycletls-fetch';
 import "dotenv/config"
-import { fetch } from '../dist/cycletls-fetch.js';
 
 // Configuration
 const PORT = process.env.PORT || 3000;
@@ -27,18 +27,20 @@ async function collectAsyncGenerator<T>(generator: AsyncGenerator<T>): Promise<T
 // Main function to set up and start the server
 async function main() {
   const app = express();
-  const { fetch, destroy } = await initCycleTLS();
+  
+  // Initialize Scraper with the specific fetch wrapper
   const scraper = new Scraper({
-    fetch: fetch,
+    fetch: cycleTLSFetch,
   });
 
+  // Ensure CycleTLS exits cleanly when the process terminates
   process.on('exit', () => {
     console.log('Destroying cycletls...');
-    destroy();
+    cycleTLSExit();
   });
 
   console.log('Logging into Twitter...');
-  await scraper.login(USERNAME, PASSWORD, EMAIL);
+  await scraper.login(USERNAME as string, PASSWORD as string, EMAIL);
   console.log('Login successful. Starting server...');
 
   app.use(express.json());
@@ -48,7 +50,7 @@ async function main() {
   // 1. Fetch User Tweets
   app.get('/tweets/:username', async (req: Request, res: Response) => {
     try {
-      const username = req.params.username;
+      const username = req.params.username as string;
       const count = req.query.count ? parseInt(req.query.count as string, 10) : 20;
 
       if (isNaN(count) || count <= 0) {
@@ -96,7 +98,7 @@ async function main() {
       }
       
       console.log(`Searching for "${query}" (mode: ${mode}, count: ${count})`);
-      const searchGenerator = scraper.searchTweets(query, count, mode as SearchMode);
+      const searchGenerator = scraper.searchTweets(query, count, mode as unknown as SearchMode);
       const searchResults = await collectAsyncGenerator(searchGenerator);
 
       res.json({
