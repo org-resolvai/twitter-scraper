@@ -117,6 +117,13 @@ dist
 # NPM lockfile
 package-lock.json
 
-.env*.local
 *.har
-.env
+
+# System & IDE
+.DS_Store
+Thumbs.db
+.claude/
+*.pem
+
+# Local/Private scripts
+debug_cookies.ts
