@@ -6,10 +6,12 @@ services:
       - .env.local
     environment:
       - DATABASE_URL=postgresql://neondb_owner:npg_hNJyn57adrgx@ep-aged-truth-a1vexyjq-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-      - API_URL=http://api:3000
+      - API_URL=http://twitter-scraper-api:3000
     depends_on:
-      - api
-  api:
+      - twitter-scraper-api
+    networks:
+      - dockge_default
+  twitter-scraper-api:
     build: .
     command: ["yarn", "server"]
     ports:
@@ -25,3 +27,9 @@ services:
     #   - TWITTER_EMAIL=${TWITTER_EMAIL}
     #   - TWITTER_COOKIES=${TWITTER_COOKIES}
     #   - PROXY_URL=${PROXY_URL}
+    networks:
+      - dockge_default
+
+networks:
+  dockge_default:
+    external: true
