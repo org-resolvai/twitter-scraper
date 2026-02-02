@@ -185,7 +185,5 @@ import { fileURLToPath } from 'url';
 
 // ... (functions)
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  runMonitor();
-}
+runMonitor();
 

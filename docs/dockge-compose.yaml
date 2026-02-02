@@ -1,0 +1,40 @@
+# This is the correct docker-compose.yaml for Dockge.
+# It defines two services, both built from the same Docker image,
+# but running different commands.
+
+services:
+  # Service 1: The API Server
+  # This service runs the default command from the Dockerfile ("yarn server").
+  twitter-scraper-api:
+    image: ghcr.io/org-resolvai/twitter-scraper:latest
+    restart: unless-stopped
+    ports:
+      # Exposes the API on port 3000 of the host machine.
+      - "3000:3000"
+    environment:
+      # Environment variables required for the API server to log in.
+      TWITTER_USERNAME: ${TWITTER_USERNAME}
+      TWITTER_PASSWORD: ${TWITTER_PASSWORD}
+      TWITTER_EMAIL: ${TWITTER_EMAIL} # Optional, but recommended
+    networks:
+      - dockge_default
+
+  # Service 2: The Background Monitor
+  # This service overrides the default command to run the monitor script.
+  twitter-scraper-monitor:
+    image: ghcr.io/org-resolvai/twitter-scraper:latest
+    restart: unless-stopped
+    environment:
+      # Environment variables required for the monitor to log in and connect to the database.
+      DATABASE_URL: ${DATABASE_URL}
+      TWITTER_USERNAME: ${TWITTER_USERNAME}
+      TWITTER_PASSWORD: ${TWITTER_PASSWORD}
+      TWITTER_EMAIL: ${TWITTER_EMAIL} # Optional
+    command: ["yarn", "monitor"] # This is the key: it runs the monitor instead of the server.
+    networks:
+      - dockge_default
+
+# Defines the shared network for the services.
+networks:
+  dockge_default:
+    external: true
