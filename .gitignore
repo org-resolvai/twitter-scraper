@@ -114,9 +114,6 @@ dist
 # JetBrains
 .idea/
 
-# Documentation
-docs/
-
 # NPM lockfile
 package-lock.json
 
