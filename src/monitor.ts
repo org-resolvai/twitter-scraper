@@ -173,10 +173,9 @@ export async function runMonitor(poolInstance: Pool = pool) {
 
   } catch (err) {
     console.error('Fatal error in monitor:', err);
-    process.exit(1);
-  } finally {
     await poolInstance.end();
     cycleTLSExit();
+    process.exit(1);
   }
 }
 
