@@ -24,6 +24,7 @@ COPY . .
 # Build the project
 RUN yarn build
 RUN yarn build:monitor
+RUN yarn build:server
 
 # Default: run the monitor
 CMD ["yarn", "monitor"]

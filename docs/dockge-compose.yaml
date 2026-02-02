@@ -4,10 +4,11 @@
 
 services:
   # Service 1: The API Server
-  # This service runs the default command from the Dockerfile ("yarn server").
+  # This service runs the API server.
   twitter-scraper-api:
     image: ghcr.io/org-resolvai/twitter-scraper:latest
     restart: unless-stopped
+    command: ["yarn", "server"] # <-- This line is the required fix.
     ports:
       # Exposes the API on port 3000 of the host machine.
       - "3000:3000"
