@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { Scraper, Tweet, SearchMode } from './scraper';
 import "dotenv/config"
+import { fetch } from '../dist/cycletls-fetch.js';
 
 // Configuration
 const PORT = process.env.PORT || 3000;
@@ -26,7 +27,15 @@ async function collectAsyncGenerator<T>(generator: AsyncGenerator<T>): Promise<T
 // Main function to set up and start the server
 async function main() {
   const app = express();
-  const scraper = new Scraper();
+  const { fetch, destroy } = await initCycleTLS();
+  const scraper = new Scraper({
+    fetch: fetch,
+  });
+
+  process.on('exit', () => {
+    console.log('Destroying cycletls...');
+    destroy();
+  });
 
   console.log('Logging into Twitter...');
   await scraper.login(USERNAME, PASSWORD, EMAIL);
