@@ -11,7 +11,7 @@ jest.mock('./cycletls-fetch', () => ({
 
 // Mock the entire module to verify behavior
 // We need to define the server logic inside the test or refactor server.ts to export the app
-// Since server.ts currently runs "main()" immediately, we should refactor it slightly 
+// Since server.ts currently runs "main()" immediately, we should refactor it slightly
 // to be testable, or we can copy the logic into a helper for this test.
 // For now, let's create a testable app factory to simulate the server.ts logic.
 
@@ -23,7 +23,7 @@ const createTestApp = (scraperInstance: any) => {
     try {
       const username = req.params.username;
       const count = parseInt(req.query.count as string) || 20;
-      
+
       const tweetsGenerator = scraperInstance.getTweets(username, count);
       const tweets = [];
       for await (const tweet of tweetsGenerator) {
@@ -31,7 +31,9 @@ const createTestApp = (scraperInstance: any) => {
       }
 
       if (tweets.length === 0) {
-        return res.status(404).json({ error: 'User not found or has no tweets.' });
+        return res
+          .status(404)
+          .json({ error: 'User not found or has no tweets.' });
       }
 
       res.json({
@@ -50,7 +52,11 @@ const createTestApp = (scraperInstance: any) => {
       const count = parseInt(req.query.count as string) || 20;
       const mode = (req.query.mode as string) || 'Top';
 
-      const searchGenerator = scraperInstance.searchTweets(query, count, mode as unknown as SearchMode);
+      const searchGenerator = scraperInstance.searchTweets(
+        query,
+        count,
+        mode as unknown as SearchMode,
+      );
       const results = [];
       for await (const tweet of searchGenerator) {
         results.push(tweet);
@@ -100,7 +106,7 @@ describe('API Server Endpoints', () => {
     mockScraper.getTweets.mockReturnValue(mockGenerator());
 
     const res = await request(app).get('/tweets/elonmusk');
-    
+
     expect(res.status).toBe(200);
     expect(res.body.meta.username).toBe('elonmusk');
     expect(res.body.data).toHaveLength(2);
@@ -135,7 +141,7 @@ describe('API Server Endpoints', () => {
     mockScraper.getTweets.mockReturnValue(mockGenerator());
 
     const res = await request(app).get('/tweets/unknown_user');
-    
+
     expect(res.status).toBe(404);
   });
 });

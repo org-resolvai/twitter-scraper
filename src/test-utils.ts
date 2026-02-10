@@ -72,7 +72,9 @@ export async function getScraper(
     }>;
     const cookieStrings = parsedCookies.map(
       (c) =>
-        `${c.key}=${c.value}; Domain=${c.domain || '.x.com'}; Path=${c.path || '/'}`,
+        `${c.key}=${c.value}; Domain=${c.domain || '.x.com'}; Path=${
+          c.path || '/'
+        }`,
     );
     await scraper.setCookies(cookieStrings);
   }

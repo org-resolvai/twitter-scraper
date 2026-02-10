@@ -46,7 +46,7 @@
     "commit": "cz",
     "docs:generate": "typedoc --options typedoc.json",
     "docs:deploy": "yarn docs:generate && gh-pages -d docs",
-    "format": "prettier --write src/**/*.ts examples/**/*.{ts,js,tsx}",
+    "format": "prettier --write \"src/**/*.ts\" \"examples/**/*.{ts,js,cjs,mjs,tsx}\"",
     "prepare": "husky install",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --forceExit"
   },

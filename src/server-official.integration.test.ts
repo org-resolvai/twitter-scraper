@@ -1,19 +1,21 @@
 import request from 'supertest';
 import { app } from './server-official';
-import "dotenv/config";
+import 'dotenv/config';
 
 // Integration Test: Official API Server
 // Uses REAL Twitter API credentials from .env
 // WARN: Consumes API rate limits.
 
 describe('Official API Server (Integration)', () => {
-  
   // Skip tests if credentials are missing to avoid false negatives in CI/CD
-  const hasCredentials = process.env.TWITTER_BEARER_TOKEN || 
+  const hasCredentials =
+    process.env.TWITTER_BEARER_TOKEN ||
     (process.env.TWITTER_API_KEY && process.env.TWITTER_ACCESS_TOKEN);
 
   if (!hasCredentials) {
-    console.warn('Skipping integration tests: No Twitter API credentials found in .env');
+    console.warn(
+      'Skipping integration tests: No Twitter API credentials found in .env',
+    );
     test.skip('Skipping integration tests', () => {});
     return;
   }
@@ -21,8 +23,8 @@ describe('Official API Server (Integration)', () => {
   // 1. Test Fetching a Real User's Timeline
   test('GET /tweets/:username returns real tweets (Integration)', async () => {
     // Using 'elonmusk' as requested - a very active account
-    const targetUser = 'elonmusk'; 
-    
+    const targetUser = 'elonmusk';
+
     // API v2 requires min 10 results
     const res = await request(app).get(`/tweets/${targetUser}?count=15`);
 
@@ -65,12 +67,11 @@ describe('Official API Server (Integration)', () => {
     const fakeUser = `usr_${randomSuffix}`;
 
     const res = await request(app).get(`/tweets/${fakeUser}`);
-    
-    // API v2 might return 400 or 404 depending on exact error, 
+
+    // API v2 might return 400 or 404 depending on exact error,
     // but our server maps "no data" to 404.
     // Sometimes the library throws a 404 error which express catches and returns 500
     // We want to ensure it's NOT a 200 OK with data.
     expect(res.status).not.toBe(200);
   });
-
 });

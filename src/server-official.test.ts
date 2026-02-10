@@ -9,14 +9,14 @@ jest.mock('twitter-api-v2', () => {
     userTimeline: jest.fn(),
     search: jest.fn(),
   };
-  
+
   return {
     TwitterApi: jest.fn().mockImplementation(() => {
       return {
         v2: mockV2Client,
-        readOnly: { v2: mockV2Client } // In case readOnly is used
+        readOnly: { v2: mockV2Client }, // In case readOnly is used
       };
-    })
+    }),
   };
 });
 
@@ -33,7 +33,7 @@ describe('Official API Server', () => {
   test('GET /tweets/:username should return mapped tweets', async () => {
     // 1. Mock ID lookup
     mockV2.userByUsername.mockResolvedValue({
-      data: { id: '12345', username: 'testuser' }
+      data: { id: '12345', username: 'testuser' },
     });
 
     // 2. Mock Timeline response
@@ -49,17 +49,15 @@ describe('Official API Server', () => {
               like_count: 10,
               retweet_count: 5,
               reply_count: 1,
-              impression_count: 100
-            }
-          }
+              impression_count: 100,
+            },
+          },
         ],
         includes: {
-          users: [
-            { id: '12345', username: 'testuser' }
-          ]
+          users: [{ id: '12345', username: 'testuser' }],
         },
-        meta: { result_count: 1 }
-      }
+        meta: { result_count: 1 },
+      },
     });
 
     const res = await request(app).get('/tweets/testuser');
@@ -67,7 +65,7 @@ describe('Official API Server', () => {
     expect(res.status).toBe(200);
     expect(res.body.meta.username).toBe('testuser');
     expect(res.body.data).toHaveLength(1);
-    
+
     const tweet = res.body.data[0];
     expect(tweet.id).toBe('tweet-1');
     expect(tweet.text).toBe('Hello World');
@@ -90,17 +88,15 @@ describe('Official API Server', () => {
               like_count: 0,
               retweet_count: 0,
               reply_count: 0,
-              impression_count: 0
-            }
-          }
+              impression_count: 0,
+            },
+          },
         ],
         includes: {
-          users: [
-            { id: '999', username: 'otheruser' }
-          ]
+          users: [{ id: '999', username: 'otheruser' }],
         },
-        meta: { result_count: 1 }
-      }
+        meta: { result_count: 1 },
+      },
     });
 
     const res = await request(app).get('/search?q=test');
@@ -117,7 +113,7 @@ describe('Official API Server', () => {
   test('GET /tweets/:username should return 404 if user not found', async () => {
     // Mock user lookup failing (or returning undefined data)
     mockV2.userByUsername.mockResolvedValue({
-      data: undefined
+      data: undefined,
     });
 
     const res = await request(app).get('/tweets/unknown');

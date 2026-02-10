@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { Scraper, SearchMode } from './scraper';
 import { cycleTLSFetch, cycleTLSExit } from './cycletls-fetch';
-import "dotenv/config"
+import 'dotenv/config';
 
 // Configuration
 const PORT = process.env.PORT || 3000;
@@ -16,7 +16,9 @@ if (!USERNAME || !PASSWORD) {
 }
 
 // Helper function to collect results from an AsyncGenerator
-async function collectAsyncGenerator<T>(generator: AsyncGenerator<T>): Promise<T[]> {
+async function collectAsyncGenerator<T>(
+  generator: AsyncGenerator<T>,
+): Promise<T[]> {
   const results: T[] = [];
   for await (const value of generator) {
     results.push(value);
@@ -27,7 +29,7 @@ async function collectAsyncGenerator<T>(generator: AsyncGenerator<T>): Promise<T
 // Main function to set up and start the server
 async function main() {
   const app = express();
-  
+
   // Initialize Scraper with the specific fetch wrapper
   const scraper = new Scraper({
     fetch: cycleTLSFetch,
@@ -51,12 +53,18 @@ async function main() {
   app.get('/tweets/:username', async (req: Request, res: Response) => {
     try {
       const username = req.params.username as string;
-      const count = req.query.count ? parseInt(req.query.count as string, 10) : 20;
+      const count = req.query.count
+        ? parseInt(req.query.count as string, 10)
+        : 20;
 
       if (isNaN(count) || count <= 0) {
-        return res.status(400).json({ error: 'Invalid count parameter. Must be a positive number.' });
+        return res
+          .status(400)
+          .json({
+            error: 'Invalid count parameter. Must be a positive number.',
+          });
       }
-      
+
       console.log(`Fetching ${count} tweets for user: ${username}`);
       const tweetsGenerator = scraper.getTweets(username, count);
       const tweets = await collectAsyncGenerator(tweetsGenerator);
@@ -64,7 +72,9 @@ async function main() {
       if (tweets.length === 0) {
         // This could mean the user has no tweets or the user does not exist.
         // The core library doesn't distinguish, so we return a 404.
-        return res.status(404).json({ error: 'User not found or has no tweets.' });
+        return res
+          .status(404)
+          .json({ error: 'User not found or has no tweets.' });
       }
 
       res.json({
@@ -84,21 +94,37 @@ async function main() {
   app.get('/search', async (req: Request, res: Response) => {
     try {
       const query = req.query.q as string;
-      const count = req.query.count ? parseInt(req.query.count as string, 10) : 20;
+      const count = req.query.count
+        ? parseInt(req.query.count as string, 10)
+        : 20;
       const mode = (req.query.mode as string) || 'Top';
 
       if (!query) {
-        return res.status(400).json({ error: 'Search query parameter "q" is required.' });
+        return res
+          .status(400)
+          .json({ error: 'Search query parameter "q" is required.' });
       }
       if (isNaN(count) || count <= 0) {
-        return res.status(400).json({ error: 'Invalid count parameter. Must be a positive number.' });
+        return res
+          .status(400)
+          .json({
+            error: 'Invalid count parameter. Must be a positive number.',
+          });
       }
       if (mode !== 'Top' && mode !== 'Latest') {
-        return res.status(400).json({ error: 'Invalid mode parameter. Must be "Top" or "Latest".' });
+        return res
+          .status(400)
+          .json({
+            error: 'Invalid mode parameter. Must be "Top" or "Latest".',
+          });
       }
-      
+
       console.log(`Searching for "${query}" (mode: ${mode}, count: ${count})`);
-      const searchGenerator = scraper.searchTweets(query, count, mode as unknown as SearchMode);
+      const searchGenerator = scraper.searchTweets(
+        query,
+        count,
+        mode as unknown as SearchMode,
+      );
       const searchResults = await collectAsyncGenerator(searchGenerator);
 
       res.json({
