@@ -13,20 +13,20 @@ services:
       - dockge_default
   twitter-scraper-api:
     build: .
-    command: ["yarn", "server"]
+    # Switch to the official server implementation
+    command: ["yarn", "server:official"]
     ports:
       - "3000:3000"
     env_file:
       - .env.local
     environment:
       - DATABASE_URL=postgresql://neondb_owner:npg_hNJyn57adrgx@ep-aged-truth-a1vexyjq-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-    # Or specify individual environment variables:
-    # environment:
-    #   - TWITTER_USERNAME=${TWITTER_USERNAME}
-    #   - TWITTER_PASSWORD=${TWITTER_PASSWORD}
-    #   - TWITTER_EMAIL=${TWITTER_EMAIL}
-    #   - TWITTER_COOKIES=${TWITTER_COOKIES}
-    #   - PROXY_URL=${PROXY_URL}
+      # Ensure Official API credentials are passed through
+      # - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN}
+      # - TWITTER_API_KEY=${TWITTER_API_KEY}
+      # - TWITTER_API_SECRET=${TWITTER_API_SECRET}
+      # - TWITTER_ACCESS_TOKEN=${TWITTER_ACCESS_TOKEN}
+      # - TWITTER_ACCESS_SECRET=${TWITTER_ACCESS_SECRET}
     networks:
       - dockge_default
 

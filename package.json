@@ -39,7 +39,9 @@
     "build": "rimraf dist && rollup -c",
     "build:monitor": "esbuild src/monitor.ts --bundle --platform=node --target=node16 --outfile=dist/monitor.js --external:pg --external:tough-cookie --external:cycletls --define:PLATFORM_NODE=true",
     "build:server": "esbuild src/server.ts --bundle --platform=node --target=node16 --outfile=dist/server.js --external:pg --external:tough-cookie --external:cycletls --define:PLATFORM_NODE=true",
+    "build:server-official": "esbuild src/server-official.ts --bundle --platform=node --target=node16 --outfile=dist/server-official.js --external:twitter-api-v2 --external:express --define:PLATFORM_NODE=true",
     "server": "node dist/server.js",
+    "server:official": "node dist/server-official.js",
     "monitor": "node dist/monitor.js",
     "commit": "cz",
     "docs:generate": "typedoc --options typedoc.json",
@@ -61,6 +63,7 @@
     "set-cookie-parser": "^2.6.0",
     "tough-cookie": "^4.1.2",
     "tslib": "^2.5.2",
+    "twitter-api-v2": "^1.29.0",
     "x-client-transaction-id": "^0.1.9"
   },
   "peerDependencies": {

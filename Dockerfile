@@ -25,6 +25,7 @@ COPY . .
 RUN yarn build
 RUN yarn build:monitor
 RUN yarn build:server
+RUN yarn build:server-official
 
 # Default: run the monitor
 CMD ["yarn", "monitor"]
