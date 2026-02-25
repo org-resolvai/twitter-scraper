@@ -8,15 +8,16 @@ services:
   twitter-scraper-api:
     image: ghcr.io/org-resolvai/twitter-scraper:latest
     restart: unless-stopped
-    command: ["yarn", "server"] # <-- This line is the required fix.
+    command: ["yarn", "server:official"] # <-- This line is the required fix.
     ports:
       # Exposes the API on port 3000 of the host machine.
       - "3000:3000"
     environment:
       # Environment variables required for the API server to log in.
-      TWITTER_USERNAME: ${TWITTER_USERNAME}
-      TWITTER_PASSWORD: ${TWITTER_PASSWORD}
-      TWITTER_EMAIL: ${TWITTER_EMAIL} # Optional, but recommended
+      # TWITTER_USERNAME: ${TWITTER_USERNAME}
+      # TWITTER_PASSWORD: ${TWITTER_PASSWORD}
+      # TWITTER_EMAIL: ${TWITTER_EMAIL} # Optional, but recommended
+      TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN}
     networks:
       - dockge_default
 
@@ -37,5 +38,4 @@ services:
 
 # Defines the shared network for the services.
 networks:
-  dockge_default:
-    external: true
+  dockge_default: {}

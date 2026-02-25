@@ -61,7 +61,7 @@ await scraper.login(
   'username',
   'password',
   'email', // optional
-  'twoFactorSecret' // optional, for 2FA
+  'twoFactorSecret', // optional, for 2FA
 );
 ```
 
@@ -288,10 +288,10 @@ yarn server
 
 **Endpoints:**
 
-*   `GET /tweets/:username`: Fetch the latest tweets from a user's timeline.
-    *   Query params: `count` (default: 20)
-*   `GET /search`: Search for tweets.
-    *   Query params: `q` (query), `mode` (Top, Latest), `count` (default: 20)
+- `GET /tweets/:username`: Fetch the latest tweets from a user's timeline.
+  - Query params: `count` (default: 20)
+- `GET /search`: Search for tweets.
+  - Query params: `q` (query), `mode` (Top, Latest), `count` (default: 20)
 
 **Examples:**
 
@@ -302,6 +302,10 @@ curl "http://localhost:3000/tweets/elonmusk"
 # Search for "Node.js"
 curl "http://localhost:3000/search?q=Node.js&mode=Top"
 ```
+
+### Deployment
+
+A ready-to-use Docker Compose configuration for deployment with Komodo (or Dockge) is located in the `docs/komodo-compose.yaml` file.
 
 ## Contributing
 

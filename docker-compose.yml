@@ -31,5 +31,4 @@ services:
       - dockge_default
 
 networks:
-  dockge_default:
-    external: true
+  dockge_default: {}
