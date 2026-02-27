@@ -13,8 +13,8 @@ services:
       - dockge_default
   twitter-scraper-api:
     build: .
-    # Switch to the official server implementation
-    command: ["yarn", "server:official"]
+    # Switch to the scraper server implementation
+    command: ["yarn", "server"]
     ports:
       - "3000:3000"
     env_file:

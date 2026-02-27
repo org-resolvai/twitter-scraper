@@ -8,7 +8,7 @@ services:
   twitter-scraper-api:
     image: ghcr.io/org-resolvai/twitter-scraper:latest
     restart: unless-stopped
-    command: ["yarn", "server:official"] # <-- This line is the required fix.
+    command: ["yarn", "server"]
     ports:
       # Exposes the API on port 3000 of the host machine.
       - "3000:3000"
